@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F2328">
+<title>Pemakaian Printer per Lantai</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖨️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#EEF1F4; --sheet:#FFFFFF; --ink:#1F2328; --muted:#5D6670; --line:#D9DEE4;
+  --bw:#2A2E34; --cyan:#0096D2; --magenta:#CF0A78; --yellow:#E2AE00;
+  --focus:#0096D2; --danger:#B42318; --ok:#1F7A4D; --chip:#E4E8ED;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#14171B; --sheet:#1C2025; --ink:#E8EBEE; --muted:#9BA4AE; --line:#2E343B;
+    --bw:#C8CDD3; --chip:#262B31; --danger:#F97066; --ok:#4CC38A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14171B; --sheet:#1C2025; --ink:#E8EBEE; --muted:#9BA4AE; --line:#2E343B;
+  --bw:#C8CDD3; --chip:#262B31; --danger:#F97066; --ok:#4CC38A;
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 20px 64px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;line-height:1.15}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.35rem;font-weight:750}
+h3{font-size:1.05rem;font-weight:700}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid var(--ink)}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.inkmark{display:flex;gap:4px;margin-bottom:10px}
+.inkmark span{width:22px;height:8px;border-radius:2px}
+.period{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--sheet)}
+.seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+input[type=month],input[type=date],select,input[type=text],input[type=number],input[type=password]{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:38px}
+nav.tabs{display:flex;gap:4px;margin:18px 0 22px;overflow-x:auto}
+nav.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;color:var(--muted);white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--sheet);color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.danger{background:transparent;color:var(--danger);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* hero: the ink strip */
+.hero{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;margin-bottom:28px}
+.hero-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:baseline}
+.hero-total{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,6vw,3.4rem);font-stretch:80%;line-height:1}
+.hero-total small{font-size:1rem;font-weight:600;color:var(--muted);font-family:var(--body);margin-left:6px}
+.strip{display:flex;height:46px;border-radius:6px;overflow:hidden;margin:18px 0 12px;background:var(--chip)}
+.strip .s-bw{background:var(--bw)}
+.strip .s-co{background:linear-gradient(90deg,var(--cyan),var(--magenta) 55%,var(--yellow))}
+.strip > div{min-width:0;transition:flex-basis .4s ease}
+.legend{display:flex;flex-wrap:wrap;gap:8px 28px}
+.legend div{display:flex;gap:10px;align-items:center}
+.sw{width:14px;height:14px;border-radius:3px;flex:none}
+.sw.bw{background:var(--bw)} .sw.co{background:linear-gradient(135deg,var(--cyan),var(--magenta),var(--yellow))}
+.legend b{font-size:1.15rem}
+.legend .lbl{color:var(--muted);font-size:.9rem;display:block;line-height:1.2}
+
+.floors{display:grid;gap:28px}
+.floor-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.floor-head .sub{color:var(--muted);font-size:.95rem}
+.floor-head .sub b{color:var(--ink)}
+.tablebox{overflow-x:auto;background:var(--sheet);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+th{font-size:.82rem;color:var(--muted);font-weight:600;background:var(--sheet)}
+td.r,th.r{text-align:right}
+.pname{font-weight:700}
+.pmeta{font-size:.85rem;color:var(--muted)}
+.badge{display:inline-block;font-size:.75rem;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--muted);margin-left:6px;font-weight:600;vertical-align:1px}
+.badge.backup{background:color-mix(in srgb,var(--cyan) 18%,transparent);color:var(--cyan)}
+.badge.mono{background:var(--chip)}
+.mini{display:flex;height:8px;border-radius:2px;overflow:hidden;background:var(--chip);min-width:90px}
+.mini .s-bw{background:var(--bw)} .mini .s-co{background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow))}
+tfoot td{font-weight:700;background:color-mix(in srgb,var(--chip) 60%,transparent)}
+
+.section{margin-top:34px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.chart{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+
+/* input tab */
+.form-intro{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.form-intro p{margin:0;max-width:62ch;color:var(--muted)}
+td input[type=number]{width:110px;text-align:right}
+td input[type=text]{width:100%;min-width:140px}
+.prev{display:block;font-size:.78rem;color:var(--muted);margin-top:2px;white-space:nowrap}
+.sticky-bar{position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--paper) 30%);display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:12px}
+.status{font-size:.92rem;color:var(--muted)}
+.status.err{color:var(--danger)} .status.ok{color:var(--ok)}
+
+/* printers tab */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.9rem;font-weight:600}
+label.f input,label.f select{font-weight:400}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:18px}
+.check{display:flex;gap:8px;align-items:center;font-weight:600;font-size:.9rem}
+.empty{background:var(--sheet);border:1px dashed var(--line);border-radius:12px;padding:28px;text-align:center}
+.notice{background:var(--sheet);border-left:4px solid var(--magenta);padding:12px 16px;border-radius:6px;margin-bottom:16px}
+@media (max-width:600px){.wrap{padding:16px 14px 56px}h1{font-size:1.45rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.userbar{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:12px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.userbar b{color:var(--ink)}
+.linkbtn{border:1px solid var(--line);background:var(--sheet);border-radius:8px;padding:5px 12px;cursor:pointer;font-weight:600}
+.badge.admin{background:color-mix(in srgb,var(--magenta) 16%,transparent);color:var(--magenta)}
+.login{max-width:400px;margin:32px auto 0}
+.login input{width:100%}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--chip);padding:1px 5px;border-radius:4px}
+.chip{display:inline-block;font-size:.75rem;padding:1px 8px;border-radius:999px;background:var(--chip);color:var(--muted);font-weight:600;white-space:nowrap}
+.chip.awal{background:color-mix(in srgb,var(--yellow) 20%,transparent);color:color-mix(in srgb,var(--yellow) 70%,var(--ink))}
+.delta{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.delta.neg{color:var(--danger)} .delta.pos{color:var(--ok)}
+.last{font-variant-numeric:tabular-nums;white-space:nowrap}
+.toolbar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.toolbar label.f{min-width:160px}
+
+:root{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:var(--ink);-webkit-box-shadow:0 0 0 1000px var(--sheet) inset;caret-color:var(--ink);transition:background-color 9999s}
+input:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:1px;border-color:var(--focus)}
+input::placeholder{color:var(--muted);opacity:.8}
+.login input{min-height:44px;padding:9px 12px}
+.login .btn{min-height:44px}
+
+/* header tabel menempel saat digulir */
+.tablebox thead th{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--sheet);box-shadow:inset 0 -1px 0 var(--line);border-bottom:0}
+@media (min-width:1100px){
+  .tablebox{overflow:visible}
+  .tablebox thead th:first-child{border-top-left-radius:12px}
+  .tablebox thead th:last-child{border-top-right-radius:12px}
+}
+@media (max-width:1099.98px){
+  .tablebox{max-height:75vh;overflow:auto;overscroll-behavior:contain}
+  .tablebox thead th{top:0}
+}
+
+.report .rep-head h2{font-size:1.5rem}
+.report .rep-head p{margin:6px 0 0}
+.report tr.dayrow td{background:color-mix(in srgb,var(--chip) 70%,transparent)}
+.report tr.subrow td{font-weight:700;background:color-mix(in srgb,var(--chip) 45%,transparent)}
+.sign{display:flex;justify-content:flex-end;gap:60px;margin-top:34px;flex-wrap:wrap}
+.sign>div{min-width:200px}
+.sign p{margin:0}
+.sline{height:56px;border-bottom:1px solid var(--ink);margin:0 0 6px}
+@media print{
+  :root{--paper:#fff;--sheet:#fff;--ink:#111;--muted:#555;--line:#ccc;--bw:#222;--chip:#eee;color-scheme:light}
+  body{background:#fff}
+  header.top,.userbar,nav.tabs,.no-print,.sticky-bar{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .tablebox{overflow:visible!important;max-height:none!important;border:0}
+  .tablebox thead th{position:static!important}
+  table{min-width:0!important;font-size:10px}
+  th,td{padding:4px 6px}
+  thead{display:table-header-group}
+  tr{break-inside:avoid}
+  @page{size:A4 landscape;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="inkmark" aria-hidden="true"><span style="background:var(--bw)"></span><span style="background:var(--cyan)"></span><span style="background:var(--magenta)"></span><span style="background:var(--yellow)"></span></div>
+      <h1>Pemakaian Printer</h1>
+      <p>Lembar hitam-putih dan warna, per printer dan per lantai</p>
+    </div>
+    <div class="period" id="periodBox" hidden>
+      <div class="seg" role="group" aria-label="Jenis periode">
+        <button data-mode="day" aria-pressed="false">Harian</button>
+        <button data-mode="month" aria-pressed="true">Bulanan</button>
+        <button data-mode="year" aria-pressed="false">Tahunan</button>
+      </div>
+      <input type="date" id="daySel" aria-label="Pilih tanggal" hidden>
+      <input type="month" id="monthSel" aria-label="Pilih bulan">
+      <select id="yearSel" aria-label="Pilih tahun" hidden></select>
+    </div>
+  </header>
+
+  <div class="userbar" id="userBar" hidden>
+    <span id="syncInfo" class="muted" style="font-size:.85rem"></span>
+    <span id="whoami"></span>
+    <button class="linkbtn" id="logoutBtn">Keluar</button>
+  </div>
+
+  <nav class="tabs" role="tablist" id="tabs" hidden></nav>
+
+  <main id="main"><p class="muted">Memuat…</p></main>
+</div>
+
+<script>
+/* ======================================================================
+   URL Web App (berakhiran /exec)
+   ====================================================================== */
+const API_URL = "https://script.google.com/macros/s/AKfycbxafwZDuJie4yu0MRHOFtZwMfdCzEF2it3XShigXRAik01veZquBYeh0o7rF-_hu9F5/exec";
+
+(function(){
+  let API=String(API_URL).trim().replace(/^["']|["']$/g,"");
+  if(/^AKfy[\w-]{20,}$/.test(API)) API="https://script.google.com/macros/s/"+API+"/exec";
+  const BULAN=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const BLN=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  const $=s=>document.querySelector(s);
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const fmt=n=>Number(n||0).toLocaleString("id-ID");
+  const rp=n=>"Rp "+Math.round(n||0).toLocaleString("id-ID");
+  const pad=n=>String(n).padStart(2,"0");
+  const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const prevMonth=m=>{const [y,mo]=m.split("-").map(Number);const d=new Date(y,mo-2,1);return d.getFullYear()+"-"+pad(d.getMonth()+1)};
+  const addDays=(s,n)=>{const [y,m,d]=s.split("-").map(Number);return ymd(new Date(y,m-1,d+n))};
+  const monthLabel=m=>{const [y,mo]=m.split("-").map(Number);return BULAN[mo-1]+" "+y};
+  const dayLabel=s=>{const [y,m,d]=s.split("-").map(Number);return d+" "+BULAN[m-1]+" "+y};
+  const shortTs=t=>{if(!t)return "";const [d,hm]=t.split(" ");const [y,m,dd]=d.split("-").map(Number);return dd+" "+BLN[m-1]+(hm?" "+hm:"")};
+  const floorLabel=l=>{const n=String(l||"").replace(/\D/g,"");return n?"Lantai "+n:(l||"Tanpa lantai")};
+
+  /* ---------- state ---------- */
+  let token=null, me=null;
+  try{ token=localStorage.getItem("pp_token"); }catch(e){}
+  let printers=[], readings=[], settings={costBw:0,costColor:0}, users=[], sheetUrl="", loadedAt="";
+  let loaded=false, loadError="";
+  let today=ymd(new Date());
+  let mode="month", selDay=today, selMonth=today.slice(0,7), selYear=Number(today.slice(0,4));
+  let readDate=today, showManual=false;
+  let histPid="", histMonth=today.slice(0,7);
+  let tab="ringkasan", sortBy="urut", dirty=false, editingId=null, editingUser=null;
+  const isAdmin=()=>me&&me.role==="admin";
+
+  /* ---------- API ---------- */
+  async function api(action,payload){
+    let res;
+    try{ res=await fetch(API,{method:"POST",body:JSON.stringify({action,token,payload})}); }
+    catch(e){ throw new Error("Tidak bisa terhubung ke server. Periksa koneksi internet, dan pastikan deployment Apps Script diatur ke \"Anyone\"."); }
+    let j; try{ j=await res.json(); }catch(e){ throw new Error("Jawaban server tidak terbaca. Pastikan URL Web App benar dan sudah dideploy sebagai New version."); }
+    if(!j.ok){ if(j.code==="AUTH"&&action!=="login"){ clearSession(); render(); } const e=new Error(j.error||"Terjadi kesalahan."); e.code=j.code; throw e; }
+    return j.data;
+  }
+  function clearSession(){ token=null; me=null; loaded=false; try{localStorage.removeItem("pp_token");localStorage.removeItem("pp_cache")}catch(e){} }
+
+  /* ---------- period controls ---------- */
+  const daySel=$("#daySel"), monthSel=$("#monthSel"), yearSel=$("#yearSel");
+  function syncPeriodInputs(){
+    daySel.value=selDay; daySel.max=today; monthSel.value=selMonth;
+    const ys=new Set([Number(today.slice(0,4)),selYear]);
+    readings.forEach(r=>ys.add(Number(r.tanggal.slice(0,4))));
+    yearSel.innerHTML=[...ys].sort((a,b)=>b-a).map(y=>`<option ${y==selYear?"selected":""}>${y}</option>`).join("");
+  }
+  function syncPeriodUI(){
+    $("#periodBox").hidden=!(token&&me)||tab!=="ringkasan";
+    document.querySelectorAll(".seg [data-mode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===mode));
+    daySel.hidden=mode!=="day"; monthSel.hidden=mode!=="month"; yearSel.hidden=mode!=="year";
+  }
+  document.querySelectorAll(".seg [data-mode]").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;syncPeriodUI();render()});
+  daySel.onchange=()=>{ if(daySel.value){selDay=daySel.value;render();} };
+  monthSel.onchange=()=>{ if(monthSel.value){selMonth=monthSel.value;render();} };
+  yearSel.onchange=()=>{selYear=Number(yearSel.value);render()};
+
+  /* ---------- tabs ---------- */
+  function buildTabs(){
+    const list=[["ringkasan","Ringkasan"],["update","Update counter"],["riwayat","Riwayat"],["laporan","Laporan"]];
+    if(isAdmin()) list.push(["printer","Daftar printer"],["pengguna","Pengguna"]);
+    list.push(["akun","Akun"]);
+    if(!list.some(t=>t[0]===tab)) tab="ringkasan";
+    const nav=$("#tabs");
+    nav.innerHTML=list.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}">${l}</button>`).join("");
+    nav.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+      if(tab==="update"&&dirty&&b.dataset.tab!=="update"&&!confirm("Counter yang sudah diketik belum disimpan. Tinggalkan?")) return;
+      if(b.dataset.tab!=="update") dirty=false;
+      tab=b.dataset.tab;
+      nav.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected",x===b));
+      render();
+    });
+  }
+
+  /* ---------- data helpers ---------- */
+  function orderedPrinters(){
+    return [...printers].sort((a,b)=>String(a.lantai).localeCompare(String(b.lantai),"id",{numeric:true})||((a.status==="Backup")-(b.status==="Backup"))||((a.urut??999)-(b.urut??999)));
+  }
+  function groups(){
+    const g=new Map();
+    orderedPrinters().forEach(p=>{const k=p.lantai||"-";if(!g.has(k))g.set(k,[]);g.get(k).push(p)});
+    return g;
+  }
+  const inPeriod=t=>mode==="day"?t.slice(0,10)===selDay:mode==="month"?t.slice(0,7)===selMonth:t.slice(0,4)===String(selYear);
+  function usage(pid){
+    let bw=0,color=0;
+    for(const r of readings){ if(r.printerId===pid&&inPeriod(r.tanggal)){bw+=r.selBw;color+=r.selColor;} }
+    return {bw,color,total:bw+color};
+  }
+  /** counter terakhir (<= batas waktu) untuk satu kanal */
+  function lastCtr(pid,key,upto){
+    let best=null;
+    for(const r of readings){ if(r.printerId===pid&&r[key]!==null&&(!upto||r.tanggal<=upto)&&(!best||r.tanggal>=best.tanggal)) best=r; }
+    return best?{val:best[key],tanggal:best.tanggal,by:best.createdBy}:null;
+  }
+  function lastUpdate(pid){ let b=null; for(const r of readings){ if(r.printerId===pid&&(!b||r.tanggal>=b.tanggal)) b=r; } return b; }
+  const cost=u=>u.bw*(Number(settings.costBw)||0)+u.color*(Number(settings.costColor)||0);
+  const hasCost=()=>(Number(settings.costBw)||0)+(Number(settings.costColor)||0)>0;
+  const periodText=()=>mode==="day"?dayLabel(selDay):mode==="month"?monthLabel(selMonth):"Tahun "+selYear;
+  const pById=id=>printers.find(p=>p.id===id);
+
+  /* ---------- render ---------- */
+  function render(){
+    const main=$("#main");
+    const logged=!!(token&&me);
+    $("#userBar").hidden=!logged; $("#tabs").hidden=!logged;
+    if(logged) $("#whoami").innerHTML=`Masuk sebagai <b>${esc(me.nama||me.username)}</b> <span class="badge ${me.role==="admin"?"admin":""}">${me.role==="admin"?"Admin":"Staff"}</span>`;
+    syncPeriodUI();
+    if(!/^https:\/\/script\.google\.com\//.test(API)){ main.innerHTML=`<div class="empty"><h3>URL Web App belum diisi</h3><p class="muted">Buka file index.html dengan Notepad, cari baris <code>const API_URL</code>, lalu tempel URL Web App yang berakhiran <code>/exec</code>.</p><p class="muted" style="font-size:.85rem;word-break:break-all">Isi saat ini: <code>${esc(API||"(kosong)")}</code></p></div>`; return; }
+    if(!logged){ renderLogin(main); return; }
+    if(!loaded){ main.innerHTML=loadError?`<div class="empty"><h3>Data belum bisa dimuat</h3><p class="muted">${esc(loadError)}</p><button class="btn" id="retry">Coba lagi</button></div>`:`<p class="muted">Memuat data…</p>`; const r=$("#retry"); if(r) r.onclick=load; return; }
+    if(tab==="ringkasan") renderSummary(main);
+    else if(tab==="update") renderUpdate(main);
+    else if(tab==="riwayat") renderHistory(main);
+    else if(tab==="laporan") renderReport(main);
+    else if(tab==="printer"&&isAdmin()) renderPrinters(main);
+    else if(tab==="pengguna"&&isAdmin()) renderUsers(main);
+    else renderAccount(main);
+  }
+
+  /* ---------- login ---------- */
+  function renderLogin(main){
+    main.innerHTML=`<div class="login card">
+      <h2>Masuk</h2>
+      <p class="muted" style="margin:4px 0 18px">Gunakan username dan password yang diberikan admin IT.</p>
+      <form id="loginForm" novalidate>
+        <label class="f">Username<input type="text" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+        <label class="f" style="margin-top:12px">Password<input type="password" name="password" autocomplete="current-password" required></label>
+        <button class="btn" type="submit" style="width:100%;margin-top:18px">Masuk</button>
+        <p class="status" id="loginStatus" role="alert" style="margin:12px 0 0;min-height:1.4em"></p>
+      </form></div>`;
+    const f=$("#loginForm"), uIn=f.querySelector("[name=username]"), pIn=f.querySelector("[name=password]"); uIn.focus();
+    f.onsubmit=async e=>{
+      e.preventDefault();
+      const st=$("#loginStatus"), btn=f.querySelector("button");
+      if(!uIn.value.trim()||!pIn.value){ st.className="status err"; st.textContent="Isi username dan password."; return; }
+      btn.disabled=true; st.className="status"; st.textContent="Memeriksa…";
+      try{
+        const d=await api("login",{username:uIn.value,password:pIn.value});
+        token=d.token; me=d.user; try{localStorage.setItem("pp_token",token)}catch(e){}
+        tab="ringkasan"; buildTabs(); render(); load();
+      }catch(err){ btn.disabled=false; st.className="status err"; st.textContent=err.message; }
+    };
+  }
+  $("#logoutBtn").onclick=async()=>{
+    if(tab==="update"&&dirty&&!confirm("Counter yang sudah diketik belum disimpan. Keluar?")) return;
+    try{ await api("logout"); }catch(e){}
+    clearSession(); dirty=false; render();
+  };
+
+  /* ---------- ringkasan ---------- */
+  function renderSummary(main){
+    if(!printers.length){ main.innerHTML=emptyPrinters(); return; }
+    let T={bw:0,color:0,total:0};
+    const parts=[];
+    for(const [floor,list] of groups()){
+      let F={bw:0,color:0,total:0};
+      let rows=list.map(p=>({p,u:usage(p.id)}));
+      if(sortBy==="total") rows.sort((a,b)=>b.u.total-a.u.total);
+      rows.forEach(({u})=>{F.bw+=u.bw;F.color+=u.color;F.total+=u.total});
+      T.bw+=F.bw;T.color+=F.color;T.total+=F.total;
+      const max=Math.max(1,...rows.map(r=>r.u.total));
+      parts.push(`<section>
+        <div class="floor-head"><h2>${esc(floorLabel(floor))}</h2>
+          <div class="sub num">${list.length} printer · <b>${fmt(F.total)}</b> lembar (${fmt(F.bw)} hitam-putih, ${fmt(F.color)} warna)${hasCost()?` · ${rp(cost(F))}`:""}</div></div>
+        <div class="tablebox"><table style="min-width:820px">
+          <thead><tr><th class="r" style="width:48px">No</th><th>Printer</th><th>Pengguna / divisi</th><th>Counter terakhir</th><th class="r">Hitam-putih</th><th class="r">Warna</th><th class="r">Total</th>${hasCost()?'<th class="r">Biaya</th>':""}<th style="width:15%">Proporsi</th></tr></thead>
+          <tbody>${rows.map(({p,u},i)=>{const lb=lastCtr(p.id,"ctrBw"),lc=lastCtr(p.id,"ctrColor"),lu=lastUpdate(p.id);
+            return `<tr>
+            <td class="r num muted">${i+1}</td>
+            <td><span class="pname">${esc(p.merk)} ${esc(p.tipe)}</span>${p.status==="Backup"?'<span class="badge backup">Backup</span>':""}${p.mono?'<span class="badge mono">Hitam saja</span>':""}<div class="pmeta">${esc([p.koneksi,p.sn&&("SN "+p.sn)].filter(Boolean).join(" · "))}</div></td>
+            <td>${esc(p.user)}<div class="pmeta">${esc(p.divisi)}</div></td>
+            <td class="last">${lb||lc?`${lb?"HP "+fmt(lb.val):""}${lb&&lc?" · ":""}${lc?"W "+fmt(lc.val):""}`:'<span class="muted">belum ada</span>'}${lu?`<div class="pmeta">${esc(shortTs(lu.tanggal))} · ${esc(lu.createdBy)}</div>`:""}</td>
+            <td class="r num">${fmt(u.bw)}</td><td class="r num">${fmt(u.color)}</td><td class="r num"><b>${fmt(u.total)}</b></td>
+            ${hasCost()?`<td class="r num">${rp(cost(u))}</td>`:""}
+            <td><div class="mini" style="width:${Math.max(4,u.total/max*100)}%">${u.total?`<div class="s-bw" style="flex:${u.bw}"></div><div class="s-co" style="flex:${u.color}"></div>`:""}</div></td>
+          </tr>`}).join("")}</tbody>
+          <tfoot><tr><td colspan="4">Subtotal ${esc(floorLabel(floor))}</td><td class="r num">${fmt(F.bw)}</td><td class="r num">${fmt(F.color)}</td><td class="r num">${fmt(F.total)}</td>${hasCost()?`<td class="r num">${rp(cost(F))}</td>`:""}<td></td></tr></tfoot>
+        </table></div></section>`);
+    }
+    const pctC=T.total?Math.round(T.color/T.total*100):0, pctB=T.total?100-pctC:0;
+    main.innerHTML=`
+      <div class="hero">
+        <div class="hero-head"><h2>Semua printer · ${esc(periodText())}</h2><span class="muted" style="font-size:.85rem">Data terakhir dimuat ${esc(loadedAt)}</span></div>
+        <div class="hero-total num" style="margin-top:10px">${fmt(T.total)}<small>lembar</small></div>
+        <div class="strip" role="img" aria-label="${fmt(T.bw)} lembar hitam-putih dan ${fmt(T.color)} lembar warna">
+          ${T.total?`<div class="s-bw" style="flex-basis:${T.bw/T.total*100}%"></div><div class="s-co" style="flex-basis:${T.color/T.total*100}%"></div>`:""}
+        </div>
+        <div class="legend num">
+          <div><span class="sw bw"></span><span><b>${fmt(T.bw)}</b><span class="lbl">Hitam-putih · ${pctB}%</span></span></div>
+          <div><span class="sw co"></span><span><b>${fmt(T.color)}</b><span class="lbl">Warna · ${pctC}%</span></span></div>
+          ${hasCost()?`<div><span><b>${rp(cost(T))}</b><span class="lbl">Estimasi biaya</span></span></div>`:""}
+        </div>
+        ${!T.total?`<p class="muted" style="margin:14px 0 0">Belum ada pemakaian pada periode ini. Isi counter sekarang di tab <b>Update counter</b>.</p>`:""}
+      </div>
+      <div class="section-head"><h2>Per lantai</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="muted" for="sortSel" style="font-size:.9rem">Urutkan</label>
+          <select id="sortSel"><option value="urut" ${sortBy==="urut"?"selected":""}>Sesuai inventaris</option><option value="total" ${sortBy==="total"?"selected":""}>Pemakaian terbanyak</option></select>
+          <button class="btn ghost" id="refBtn">Muat ulang</button>
+          ${isAdmin()&&sheetUrl?`<a class="btn ghost" style="text-decoration:none" href="${esc(sheetUrl)}" target="_blank" rel="noopener">Buka spreadsheet</a>`:""}
+        </div></div>
+      <div class="floors">${parts.join("")}</div>
+      <div class="section"><div class="section-head"><h2>${mode==="day"?"Tren 14 hari":"Tren 12 bulan"}</h2><span class="muted" style="font-size:.9rem">Semua printer</span></div>
+        <div class="chart">${trendSvg()}</div></div>`;
+    $("#sortSel").onchange=e=>{sortBy=e.target.value;render()};
+    $("#refBtn").onclick=load;
+  }
+
+  function trendSvg(){
+    let keys=[], label, sub, cur, len;
+    if(mode==="day"){ for(let i=13;i>=0;i--) keys.push(addDays(selDay,-i)); len=10; cur=selDay;
+      label=k=>String(Number(k.slice(8,10))); sub=(k,i)=>(i===0||k.slice(8,10)==="01")?BLN[Number(k.slice(5,7))-1]:""; }
+    else { if(mode==="year"){ for(let i=1;i<=12;i++) keys.push(selYear+"-"+pad(i)); } else { let m=selMonth; for(let i=0;i<12;i++){keys.unshift(m);m=prevMonth(m);} }
+      len=7; cur=mode==="month"?selMonth:null; label=k=>BLN[Number(k.slice(5,7))-1]; sub=(k,i)=>(i===0||k.slice(5,7)==="01")?k.slice(0,4):""; }
+    const data=keys.map(k=>{let bw=0,c=0;for(const r of readings){if(r.tanggal.slice(0,len)===k){bw+=r.selBw;c+=r.selColor}}return {k,bw,c}});
+    const max=Math.max(1,...data.map(d=>d.bw+d.c));
+    const n=keys.length,W=720,H=220,pl=46,pb=34,pt=14,cw=(W-pl-10)/n,bw=cw*0.58,ih=H-pb-pt;
+    const ticks=[0,.5,1].map(t=>({y:pt+ih-ih*t,v:Math.round(max*t)}));
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tren pemakaian">
+      <defs><linearGradient id="gc" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--cyan)"/><stop offset=".55" stop-color="var(--magenta)"/><stop offset="1" stop-color="var(--yellow)"/></linearGradient></defs>
+      ${ticks.map(t=>`<line x1="${pl}" x2="${W-6}" y1="${t.y}" y2="${t.y}" stroke="var(--line)"/><text x="${pl-6}" y="${t.y+4}" text-anchor="end" font-size="11" fill="var(--muted)">${fmt(t.v)}</text>`).join("")}
+      ${data.map((d,i)=>{const x=pl+i*cw+(cw-bw)/2;const hb=d.bw/max*ih,hc=d.c/max*ih;const isCur=d.k===cur;
+        return `<g><title>${mode==="day"?dayLabel(d.k):monthLabel(d.k)}: ${fmt(d.bw)} hitam-putih, ${fmt(d.c)} warna</title>
+        <rect x="${x}" y="${pt+ih-hb}" width="${bw}" height="${hb}" fill="var(--bw)"/>
+        <rect x="${x}" y="${pt+ih-hb-hc}" width="${bw}" height="${hc}" fill="url(#gc)"/>
+        <text x="${x+bw/2}" y="${H-pb+16}" text-anchor="middle" font-size="11" fill="${isCur?"var(--ink)":"var(--muted)"}" font-weight="${isCur?700:400}">${label(d.k)}</text>
+        <text x="${x+bw/2}" y="${H-pb+29}" text-anchor="middle" font-size="10" fill="var(--muted)">${sub(d.k,i)}</text></g>`}).join("")}
+    </svg>`;
+  }
+
+  /* ---------- update counter ---------- */
+  function renderUpdate(main){
+    if(!printers.length){ main.innerHTML=emptyPrinters(); return; }
+    const upto=readDate+" 23:59";
+    const parts=[];
+    for(const [floor,list] of groups()){
+      parts.push(`<h2 style="margin:22px 0 10px">${esc(floorLabel(floor))}</h2><div class="tablebox"><table style="min-width:${showManual?1000:820}px">
+        <thead><tr><th class="r" style="width:48px">No</th><th>Printer</th><th>Counter terakhir</th><th class="r">Counter sekarang<br>hitam-putih</th><th class="r">Counter sekarang<br>warna</th><th>Selisih (otomatis)</th>${showManual?'<th class="r">Lembar manual<br>hitam-putih</th><th class="r">Lembar manual<br>warna</th>':""}<th>Catatan</th></tr></thead><tbody>
+        ${list.map((p,i)=>{const lb=lastCtr(p.id,"ctrBw",upto),lc=lastCtr(p.id,"ctrColor",upto);
+          return `<tr data-pid="${esc(p.id)}" data-lbw="${lb?lb.val:""}" data-lco="${lc?lc.val:""}">
+          <td class="r num muted">${i+1}</td>
+          <td><span class="pname">${esc(p.tipe)}</span>${p.status==="Backup"?'<span class="badge backup">Backup</span>':""}<div class="pmeta">${esc(p.user)} · ${esc(p.divisi)}</div>${p.sn?`<div class="pmeta">SN ${esc(p.sn)}</div>`:""}</td>
+          <td class="last">${lb?"HP <b>"+fmt(lb.val)+"</b>":'<span class="muted">HP –</span>'}${p.mono?"":(lc?"<br>W <b>"+fmt(lc.val)+"</b>":'<br><span class="muted">W –</span>')}${(lb||lc)?`<div class="pmeta">${esc(shortTs((lb||lc).tanggal))} · ${esc((lb||lc).by)}</div>`:'<div class="pmeta">belum pernah diisi</div>'}</td>
+          <td class="r"><input type="number" min="0" inputmode="numeric" name="ctrBw" aria-label="Counter sekarang hitam-putih ${esc(p.tipe)} ${esc(p.user)}"></td>
+          <td class="r"><input type="number" min="0" inputmode="numeric" name="ctrColor" ${p.mono?"disabled placeholder='–'":""} aria-label="Counter sekarang warna ${esc(p.tipe)} ${esc(p.user)}"></td>
+          <td class="sel"><span class="muted">–</span></td>
+          ${showManual?`<td class="r"><input type="number" min="0" inputmode="numeric" name="manualBw" aria-label="Lembar manual hitam-putih ${esc(p.tipe)}"></td><td class="r"><input type="number" min="0" inputmode="numeric" name="manualColor" ${p.mono?"disabled":""} aria-label="Lembar manual warna ${esc(p.tipe)}"></td>`:""}
+          <td><input type="text" name="note" placeholder="opsional" aria-label="Catatan ${esc(p.tipe)} ${esc(p.user)}"></td></tr>`}).join("")}
+        </tbody></table></div>`);
+    }
+    main.innerHTML=`<div class="form-intro"><div><h2>Update counter</h2>
+        <p style="margin-top:6px">Cukup isi <b>counter sekarang</b> dari status sheet atau web config printer. Selisih dengan <b>counter terakhir</b> dihitung otomatis dan langsung masuk ke pemakaian tanggal pembacaan. Printer yang tidak diisi dilewati.</p></div></div>
+      <div class="toolbar">
+        <label class="f">Tanggal pembacaan<input type="date" id="readDate" value="${readDate}" max="${today}"></label>
+        <label class="check" style="margin-bottom:8px"><input type="checkbox" id="manualTgl" ${showManual?"checked":""}> Tampilkan kolom lembar manual (printer tanpa counter, mis. LX300)</label>
+      </div>
+      ${readDate!==today?`<p class="notice" style="margin:0 0 10px">Anda mencatat untuk tanggal <b>${esc(dayLabel(readDate))}</b> (bukan hari ini). Pembacaan dicatat pukul 23:59 tanggal tersebut.</p>`:""}
+      ${parts.join("")}
+      <div class="sticky-bar"><span class="status" id="saveStatus"></span><button class="btn" id="saveBtn">Simpan update</button></div>`;
+    $("#readDate").onchange=e=>{ if(!e.target.value) return; if(dirty&&!confirm("Counter yang sudah diketik akan dikosongkan. Lanjut?")){e.target.value=readDate;return} readDate=e.target.value>today?today:e.target.value; dirty=false; render(); };
+    $("#manualTgl").onchange=e=>{ if(dirty&&!confirm("Counter yang sudah diketik akan dikosongkan. Lanjut?")){e.target.checked=showManual;return} showManual=e.target.checked; dirty=false; render(); };
+    main.querySelectorAll("tbody tr").forEach(tr=>tr.addEventListener("input",()=>{ dirty=true; $("#saveStatus").className="status"; $("#saveStatus").textContent="Belum disimpan"; updateDelta(tr); }));
+    $("#saveBtn").onclick=saveUpdate;
+  }
+  function deltaOf(tr){
+    const v=k=>{const i=tr.querySelector(`[name=${k}]`);return i&&i.value!==""?Math.round(Number(i.value)):null};
+    const cb=v("ctrBw"), cc=v("ctrColor"), lb=tr.dataset.lbw===""?null:Number(tr.dataset.lbw), lc=tr.dataset.lco===""?null:Number(tr.dataset.lco);
+    return {cb,cc,lb,lc,mb:v("manualBw"),mc:v("manualColor"),
+      db:cb===null?null:(lb===null?"awal":cb-lb), dc:cc===null?null:(lc===null?"awal":cc-lc)};
+  }
+  function updateDelta(tr){
+    const d=deltaOf(tr), cell=tr.querySelector(".sel"), parts=[];
+    const one=(x,lbl)=>x===null?"":x==="awal"?`<span class="chip awal">${lbl} titik awal</span>`:x<0?`<span class="delta neg">${lbl} ${fmt(x)} (lebih kecil!)</span>`:`<span class="delta pos">${lbl} +${fmt(x)}</span>`;
+    if(d.db!==null) parts.push(one(d.db,"HP")); if(d.dc!==null) parts.push(one(d.dc,"W"));
+    if(!parts.length&&(d.mb||d.mc)) parts.push(`<span class="delta pos">manual +${fmt((d.mb||0)+(d.mc||0))}</span>`);
+    if(!parts.length&&tr.querySelector("[name=note]").value.trim()) parts.push('<span class="chip">catatan saja</span>');
+    cell.innerHTML=parts.length?parts.join("<br>"):'<span class="muted">–</span>';
+  }
+  async function saveUpdate(){
+    const btn=$("#saveBtn"), st=$("#saveStatus"), items=[]; let sumB=0,sumC=0;
+    for(const tr of document.querySelectorAll("#main tbody tr")){
+      const d=deltaOf(tr), note=tr.querySelector("[name=note]").value.trim();
+      const p=pById(tr.dataset.pid);
+      if((typeof d.db==="number"&&d.db<0)||(typeof d.dc==="number"&&d.dc<0)){ st.className="status err"; st.textContent=`${p.tipe} (${p.user}): counter sekarang lebih kecil dari counter terakhir. Periksa lagi angkanya.`; (tr.querySelector("[name=ctrBw]")).focus(); return; }
+      if(d.cb===null&&d.cc===null&&!d.mb&&!d.mc&&!note){ continue; }
+      items.push({printerId:tr.dataset.pid,ctrBw:d.cb,ctrColor:d.cc,manualBw:d.cb===null&&d.cc===null?(d.mb||0):0,manualColor:d.cb===null&&d.cc===null?(d.mc||0):0,note});
+      sumB+=typeof d.db==="number"?d.db:(d.cb===null&&d.cc===null?(d.mb||0):0); sumC+=typeof d.dc==="number"?d.dc:(d.cb===null&&d.cc===null?(d.mc||0):0);
+    }
+    if(!items.length){ st.className="status err"; st.textContent="Belum ada counter atau catatan yang diisi."; return; }
+    btn.disabled=true; st.className="status"; st.textContent="Menyimpan…";
+    try{
+      apply(await api("addReadings",{tanggal:readDate,items}),true);
+      dirty=false; render();
+      const s2=$("#saveStatus"); s2.className="status ok"; s2.textContent=`Tersimpan: ${items.length} printer · selisih ${fmt(sumB)} hitam-putih, ${fmt(sumC)} warna`;
+    }catch(e){ btn.disabled=false; st.className="status err"; st.textContent="Gagal menyimpan: "+e.message; }
+  }
+
+  /* ---------- riwayat ---------- */
+  function renderHistory(main){
+    const opts=orderedPrinters().map(p=>`<option value="${esc(p.id)}" ${histPid===p.id?"selected":""}>${esc(floorLabel(p.lantai))} · ${esc(p.tipe)} · ${esc(p.user)}</option>`).join("");
+    let list=readings.filter(r=>(!histPid||r.printerId===histPid)&&(!histMonth||r.tanggal.slice(0,7)===histMonth));
+    list.sort((a,b)=>b.tanggal.localeCompare(a.tanggal)||b.createdAt.localeCompare(a.createdAt));
+    // tandai titik awal per printer per kanal
+    const firstIds=new Set();
+    printers.forEach(p=>["ctrBw","ctrColor"].forEach(k=>{const f=readings.filter(r=>r.printerId===p.id&&r[k]!==null).sort((a,b)=>a.tanggal.localeCompare(b.tanggal))[0]; if(f&&f.mode==="counter") firstIds.add(f.id);}));
+    const shown=list.slice(0,400);
+    let tb=0,tc=0; list.forEach(r=>{tb+=r.selBw;tc+=r.selColor});
+    const canDel=r=>isAdmin()||(r.createdBy===me.username&&r.createdAt.startsWith(today));
+    main.innerHTML=`<div class="section-head"><h2>Riwayat update</h2><span class="muted num">${list.length} update · ${fmt(tb)} hitam-putih, ${fmt(tc)} warna</span></div>
+      <div class="toolbar">
+        <label class="f">Printer<select id="hPid"><option value="">Semua printer</option>${opts}</select></label>
+        <label class="f">Bulan<input type="month" id="hMonth" value="${histMonth}"></label>
+        <button class="btn ghost" id="hAll" style="margin-bottom:1px">Semua bulan</button>
+      </div>
+      ${shown.length?`<div class="tablebox"><table style="min-width:900px"><thead><tr><th class="r" style="width:48px">No</th><th>Waktu</th><th>Printer</th><th class="r">Counter HP</th><th class="r">Counter warna</th><th class="r">Selisih HP</th><th class="r">Selisih warna</th><th>Oleh</th><th>Catatan</th><th></th></tr></thead><tbody>
+        ${shown.map((r,i)=>{const p=pById(r.printerId)||{tipe:r.printerId,user:"",lantai:""};
+          const tag=r.mode==="impor"?'<span class="chip">data lama</span>':r.mode==="catatan"?'<span class="chip">catatan</span>':r.mode==="manual"?'<span class="chip">manual</span>':firstIds.has(r.id)?'<span class="chip awal">titik awal</span>':"";
+          return `<tr><td class="r num muted">${i+1}</td><td class="num" style="white-space:nowrap">${esc(shortTs(r.tanggal))}<div class="pmeta">${esc(r.tanggal.slice(0,4))}</div></td>
+          <td><span class="pname">${esc(p.tipe)}</span> ${tag}<div class="pmeta">${esc(p.user)} · ${esc(floorLabel(p.lantai))}</div></td>
+          <td class="r num">${r.ctrBw===null?'<span class="muted">–</span>':fmt(r.ctrBw)}</td><td class="r num">${r.ctrColor===null?'<span class="muted">–</span>':fmt(r.ctrColor)}</td>
+          <td class="r num"><b>${fmt(r.selBw)}</b></td><td class="r num"><b>${fmt(r.selColor)}</b></td>
+          <td>${esc(r.createdBy)}<div class="pmeta">${esc(shortTs(r.createdAt))}</div></td><td class="pmeta">${esc(r.note)}</td>
+          <td class="r">${canDel(r)?`<button class="btn danger" data-rdel="${esc(r.id)}">Hapus</button>`:""}</td></tr>`}).join("")}
+      </tbody></table></div>${list.length>shown.length?`<p class="muted">Menampilkan 400 update terbaru dari ${list.length}. Persempit dengan filter.</p>`:""}`
+      :`<div class="empty"><p class="muted">Belum ada update untuk filter ini.</p></div>`}
+      <p class="muted" style="font-size:.88rem;margin-top:12px">Selisih = counter update ini dikurangi counter update sebelumnya pada printer yang sama. Kalau satu update dihapus, selisih update sesudahnya dihitung ulang otomatis.${isAdmin()?"":" Staff hanya bisa menghapus update miliknya yang dibuat hari ini."}</p>`;
+    $("#hPid").onchange=e=>{histPid=e.target.value;render()};
+    $("#hMonth").onchange=e=>{histMonth=e.target.value;render()};
+    $("#hAll").onclick=()=>{histMonth="";render()};
+    main.querySelectorAll("[data-rdel]").forEach(b=>b.onclick=async()=>{
+      const r=readings.find(x=>x.id===b.dataset.rdel); const p=pById(r.printerId)||{tipe:"",user:""};
+      if(!confirm(`Hapus update ${p.tipe} (${p.user}) tanggal ${shortTs(r.tanggal)}? Selisih update sesudahnya akan dihitung ulang.`)) return;
+      b.disabled=true;
+      try{ apply(await api("deleteReading",{id:r.id})); }catch(e){ b.disabled=false; alert("Gagal menghapus: "+e.message); }
+    });
+  }
+
+  /* ---------- laporan (PDF) ---------- */
+  const JSPDF_URL="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
+  const AUTOTABLE_URL="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js";
+  let repFrom=null, repTo=null, repFloor="", repPid="", repDetail=true;
+  function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=()=>rej(new Error("Gagal memuat library PDF. Periksa koneksi internet.")); document.head.appendChild(s); }); }
+  async function loadPdfLib(){
+    if(!(window.jspdf&&window.jspdf.jsPDF)) await loadScript(JSPDF_URL);
+    if(!window.jspdf.jsPDF.API.autoTable) await loadScript(AUTOTABLE_URL);
+  }
+  function reportData(){
+    const from=repFrom, to=repTo, a=from+" 00:00", z=to+" 23:59";
+    const ps=orderedPrinters().filter(p=>(!repFloor||p.lantai===repFloor)&&(!repPid||p.id===repPid));
+    const ids=new Set(ps.map(p=>p.id));
+    const rows=readings.filter(r=>ids.has(r.printerId)&&r.tanggal>=a&&r.tanggal<=z).sort((x,y)=>x.tanggal.localeCompare(y.tanggal)||x.createdAt.localeCompare(y.createdAt));
+    const prevDay=addDays(from,-1)+" 23:59";
+    const rekap=ps.map(p=>{let bw=0,c=0,n=0; rows.forEach(r=>{if(r.printerId===p.id){bw+=r.selBw;c+=r.selColor;n++;}});
+      const firstIn=k=>{const f=rows.find(r=>r.printerId===p.id&&r[k]!==null);return f?{val:f[k]}:null;};
+      const ab=lastCtr(p.id,"ctrBw",prevDay)||firstIn("ctrBw"), ac=lastCtr(p.id,"ctrColor",prevDay)||firstIn("ctrColor"), zb=lastCtr(p.id,"ctrBw",z), zc=lastCtr(p.id,"ctrColor",z);
+      return {p,bw,c,t:bw+c,n,ab:ab&&ab.val,ac:ac&&ac.val,zb:zb&&zb.val,zc:zc&&zc.val};});
+    const T=rekap.reduce((o,x)=>(o.bw+=x.bw,o.c+=x.c,o.t+=x.t,o),{bw:0,c:0,t:0});
+    const floors=new Map(); rekap.forEach(x=>{const k=x.p.lantai||"-";const f=floors.get(k)||{bw:0,c:0,t:0,n:0};f.bw+=x.bw;f.c+=x.c;f.t+=x.t;f.n++;floors.set(k,f);});
+    const days=new Map(); rows.forEach(r=>{const k=r.tanggal.slice(0,10);if(!days.has(k))days.set(k,[]);days.get(k).push(r);});
+    return {from,to,ps,rows,rekap,T,floors,days};
+  }
+  const v=x=>x===null||x===undefined?"–":fmt(x);
+  function renderReport(main){
+    if(!repTo){ repTo=today; repFrom=today.slice(0,8)+"01"; }
+    const floorsAll=[...new Set(orderedPrinters().map(p=>p.lantai))];
+    const D=reportData();
+    const filt=[repFloor?floorLabel(repFloor):"Semua lantai", repPid?(()=>{const p=pById(repPid);return p?p.tipe+" ("+p.user+")":""})():"Semua printer"].join(" · ");
+    main.innerHTML=`<div class="section-head no-print"><h2>Laporan</h2><span class="muted" style="font-size:.9rem">Rekap dan rincian setiap pencatatan per tanggal</span></div>
+      <div class="toolbar no-print">
+        <label class="f">Dari tanggal<input type="date" id="rFrom" value="${repFrom}" max="${today}"></label>
+        <label class="f">Sampai tanggal<input type="date" id="rTo" value="${repTo}" max="${today}"></label>
+        <label class="f">Lantai<select id="rFloor"><option value="">Semua lantai</option>${floorsAll.map(f=>`<option value="${esc(f)}" ${f===repFloor?"selected":""}>${esc(floorLabel(f))}</option>`).join("")}</select></label>
+        <label class="f">Printer<select id="rPid"><option value="">Semua printer</option>${orderedPrinters().filter(p=>!repFloor||p.lantai===repFloor).map(p=>`<option value="${esc(p.id)}" ${p.id===repPid?"selected":""}>${esc(p.tipe)} · ${esc(p.user)}</option>`).join("")}</select></label>
+      </div>
+      <div class="toolbar no-print" style="align-items:center">
+        <button class="btn ghost" data-rq="month">Bulan ini</button><button class="btn ghost" data-rq="prev">Bulan lalu</button><button class="btn ghost" data-rq="today">Hari ini</button><button class="btn ghost" data-rq="7">7 hari terakhir</button>
+        <label class="check"><input type="checkbox" id="rDetail" ${repDetail?"checked":""}> Sertakan rincian per tanggal</label>
+        <span style="flex:1"></span>
+        <span class="status" id="pdfStatus"></span>
+        <button class="btn ghost" id="printBtn">Cetak</button>
+        <button class="btn" id="pdfBtn">Unduh PDF</button>
+      </div>
+      <div class="report" id="reportArea">
+        <div class="rep-head"><h2>Laporan Pemakaian Printer</h2>
+          <p class="muted">Periode ${esc(dayLabel(D.from))} – ${esc(dayLabel(D.to))} · ${esc(filt)}<br>Dibuat ${esc(loadedAt)} oleh ${esc(me.nama||me.username)}</p></div>
+        <div class="legend num" style="margin:14px 0 18px">
+          <div><span><b>${fmt(D.T.t)}</b><span class="lbl">Total lembar</span></span></div>
+          <div><span class="sw bw"></span><span><b>${fmt(D.T.bw)}</b><span class="lbl">Hitam-putih</span></span></div>
+          <div><span class="sw co"></span><span><b>${fmt(D.T.c)}</b><span class="lbl">Warna</span></span></div>
+          <div><span><b>${fmt(D.rows.length)}</b><span class="lbl">Pencatatan</span></span></div>
+          ${hasCost()?`<div><span><b>${rp(cost({bw:D.T.bw,color:D.T.c}))}</b><span class="lbl">Estimasi biaya</span></span></div>`:""}
+        </div>
+        <h3 style="margin:6px 0 8px">Rekap per printer</h3>
+        <div class="tablebox"><table style="min-width:980px"><thead><tr><th class="r">No</th><th>Lantai</th><th>Printer</th><th>Serial number</th><th>Pengguna / divisi</th><th class="r">Counter awal<br>HP · W</th><th class="r">Counter akhir<br>HP · W</th><th class="r">Hitam-putih</th><th class="r">Warna</th><th class="r">Total</th></tr></thead><tbody>
+          ${D.rekap.map((x,i)=>`<tr><td class="r num muted">${i+1}</td><td>${esc(floorLabel(x.p.lantai))}</td><td class="pname">${esc(x.p.merk)} ${esc(x.p.tipe)}</td><td>${esc(x.p.sn||"–")}</td><td>${esc(x.p.user)}<div class="pmeta">${esc(x.p.divisi)}</div></td>
+            <td class="r num">${v(x.ab)} · ${x.p.mono?"–":v(x.ac)}</td><td class="r num">${v(x.zb)} · ${x.p.mono?"–":v(x.zc)}</td><td class="r num">${fmt(x.bw)}</td><td class="r num">${fmt(x.c)}</td><td class="r num"><b>${fmt(x.t)}</b></td></tr>`).join("")}
+        </tbody><tfoot>${[...D.floors].map(([k,f])=>`<tr><td colspan="7">Subtotal ${esc(floorLabel(k))}</td><td class="r num">${fmt(f.bw)}</td><td class="r num">${fmt(f.c)}</td><td class="r num">${fmt(f.t)}</td></tr>`).join("")}
+          <tr><td colspan="7">TOTAL</td><td class="r num">${fmt(D.T.bw)}</td><td class="r num">${fmt(D.T.c)}</td><td class="r num">${fmt(D.T.t)}</td></tr></tfoot></table></div>
+        ${repDetail?`<h3 style="margin:22px 0 8px">Rincian pencatatan per tanggal</h3>
+        ${D.rows.length?`<div class="tablebox"><table style="min-width:980px"><thead><tr><th class="r">No</th><th>Waktu</th><th>Printer</th><th>Pengguna</th><th class="r">Counter HP</th><th class="r">Counter W</th><th class="r">Selisih HP</th><th class="r">Selisih W</th><th>Oleh</th><th>Catatan</th></tr></thead><tbody>
+          ${(()=>{let no=0,out="";for(const [day,list] of D.days){let b=0,c=0;out+=`<tr class="dayrow"><td colspan="10"><b>${esc(dayLabel(day))}</b></td></tr>`;
+            list.forEach(r=>{const p=pById(r.printerId)||{tipe:r.printerId,user:"",lantai:""};b+=r.selBw;c+=r.selColor;no++;
+              out+=`<tr><td class="r num muted">${no}</td><td class="num">${esc(r.tanggal.slice(11,16))}</td><td><span class="pname">${esc(p.tipe)}</span><div class="pmeta">${esc(floorLabel(p.lantai))}</div></td><td>${esc(p.user)}</td><td class="r num">${v(r.ctrBw)}</td><td class="r num">${v(r.ctrColor)}</td><td class="r num"><b>${fmt(r.selBw)}</b></td><td class="r num"><b>${fmt(r.selColor)}</b></td><td>${esc(r.createdBy)}</td><td class="pmeta">${esc(r.note)}</td></tr>`;});
+            out+=`<tr class="subrow"><td colspan="6">Subtotal ${esc(dayLabel(day))}</td><td class="r num">${fmt(b)}</td><td class="r num">${fmt(c)}</td><td colspan="2" class="num">Total ${fmt(b+c)} lembar</td></tr>`;}return out;})()}
+        </tbody></table></div>`:`<div class="empty"><p class="muted">Tidak ada pencatatan pada periode ini.</p></div>`}`:""}
+        <div class="sign"><div><p>Dibuat oleh,</p><div class="sline"></div><p>${esc(me.nama||me.username)}</p></div><div><p>Diketahui oleh,</p><div class="sline"></div><p>(.................................)</p></div></div>
+      </div>`;
+    const setR=(a,b)=>{repFrom=a;repTo=b;render();};
+    $("#rFrom").onchange=e=>{ if(!e.target.value) return; repFrom=e.target.value; if(repFrom>repTo) repTo=repFrom; render(); };
+    $("#rTo").onchange=e=>{ if(!e.target.value) return; repTo=e.target.value>today?today:e.target.value; if(repTo<repFrom) repFrom=repTo; render(); };
+    $("#rFloor").onchange=e=>{ repFloor=e.target.value; repPid=""; render(); };
+    $("#rPid").onchange=e=>{ repPid=e.target.value; render(); };
+    $("#rDetail").onchange=e=>{ repDetail=e.target.checked; render(); };
+    main.querySelectorAll("[data-rq]").forEach(b=>b.onclick=()=>{const q=b.dataset.rq;
+      if(q==="month") setR(today.slice(0,8)+"01",today);
+      else if(q==="prev"){ const pm=prevMonth(today.slice(0,7)); const [y,m]=pm.split("-").map(Number); setR(pm+"-01",pm+"-"+pad(new Date(y,m,0).getDate())); }
+      else if(q==="today") setR(today,today);
+      else setR(addDays(today,-6),today); });
+    $("#printBtn").onclick=()=>window.print();
+    $("#pdfBtn").onclick=()=>makePdf(D,filt);
+  }
+  async function makePdf(D,filt){
+    const st=$("#pdfStatus"), btn=$("#pdfBtn");
+    btn.disabled=true; st.className="status"; st.textContent="Menyiapkan PDF…";
+    try{
+      await loadPdfLib();
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+      const W=doc.internal.pageSize.getWidth(), M=12;
+      const head=[30,35,40], line=[215,220,226];
+      doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor(...head);
+      doc.text("Laporan Pemakaian Printer",M,16);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(90,100,110);
+      doc.text(`Periode: ${dayLabel(D.from)} – ${dayLabel(D.to)}   ·   ${filt}`,M,22);
+      doc.text(`Dibuat: ${loadedAt} oleh ${me.nama||me.username}`,M,27);
+      // kotak ringkasan
+      const boxes=[["Total lembar",fmt(D.T.t)],["Hitam-putih",fmt(D.T.bw)],["Warna",fmt(D.T.c)],["Pencatatan",fmt(D.rows.length)]];
+      if(hasCost()) boxes.push(["Estimasi biaya",rp(cost({bw:D.T.bw,color:D.T.c}))]);
+      const bw=(W-2*M-(boxes.length-1)*4)/boxes.length;
+      boxes.forEach(([l,val],i)=>{const x=M+i*(bw+4);doc.setDrawColor(...line);doc.setFillColor(246,248,250);doc.roundedRect(x,31,bw,16,2,2,"FD");
+        doc.setFontSize(8.5);doc.setTextColor(90,100,110);doc.text(l,x+4,36.5);doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(...head);doc.text(String(val),x+4,43.5);doc.setFont("helvetica","normal");});
+      const base={theme:"grid",styles:{fontSize:8,cellPadding:1.8,lineColor:line,lineWidth:.2,textColor:head},headStyles:{fillColor:[31,35,40],textColor:255,fontStyle:"bold"},footStyles:{fillColor:[236,239,242],textColor:head,fontStyle:"bold"},margin:{left:M,right:M,top:14,bottom:14}};
+      const numR={halign:"right"};
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...head);doc.text("Rekap per printer",M,55);
+      const foot=[...D.floors].map(([k,f])=>[{content:"Subtotal "+floorLabel(k),colSpan:7,styles:{halign:"left"}},fmt(f.bw),fmt(f.c),fmt(f.t)]);
+      foot.push([{content:"TOTAL",colSpan:7,styles:{halign:"left"}},fmt(D.T.bw),fmt(D.T.c),fmt(D.T.t)]);
+      doc.autoTable({...base,startY:58,
+        head:[["No","Lantai","Printer","Serial number","Pengguna / divisi","Counter awal (HP · W)","Counter akhir (HP · W)","Hitam-putih","Warna","Total"]],
+        body:D.rekap.map((x,i)=>[i+1,floorLabel(x.p.lantai),x.p.merk+" "+x.p.tipe+(x.p.status==="Backup"?" (Backup)":""),x.p.sn||"–",x.p.user+" / "+x.p.divisi,v(x.ab)+" · "+(x.p.mono?"–":v(x.ac)),v(x.zb)+" · "+(x.p.mono?"–":v(x.zc)),fmt(x.bw),fmt(x.c),fmt(x.t)]),
+        foot, showFoot:"lastPage",
+        columnStyles:{0:{halign:"right",cellWidth:9},5:numR,6:numR,7:numR,8:numR,9:{halign:"right",fontStyle:"bold"}},
+        footStyles:{...base.footStyles},
+        didParseCell:c=>{ if(c.section==="foot"&&c.column.index>=7) c.cell.styles.halign="right"; }
+      });
+      let y=doc.lastAutoTable.finalY+8;
+      if(repDetail){
+        if(y>doc.internal.pageSize.getHeight()-40){ doc.addPage(); y=18; }
+        doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...head);doc.text("Rincian pencatatan per tanggal",M,y);
+        const body=[]; let no=0;
+        for(const [day,list] of D.days){
+          let b=0,c=0;
+          body.push([{content:dayLabel(day),colSpan:10,styles:{fontStyle:"bold",halign:"left",fillColor:[246,248,250]}}]);
+          list.forEach(r=>{const p=pById(r.printerId)||{tipe:r.printerId,user:"",lantai:""};b+=r.selBw;c+=r.selColor;no++;
+            body.push([no,r.tanggal.slice(11,16),p.tipe+" · "+floorLabel(p.lantai),p.user,v(r.ctrBw),v(r.ctrColor),fmt(r.selBw),fmt(r.selColor),r.createdBy,r.note||""]);});
+          body.push([{content:"Subtotal "+dayLabel(day),colSpan:6,styles:{fontStyle:"bold",halign:"left",fillColor:[236,239,242]}},{content:fmt(b),styles:{halign:"right",fontStyle:"bold",fillColor:[236,239,242]}},{content:fmt(c),styles:{halign:"right",fontStyle:"bold",fillColor:[236,239,242]}},{content:"Total "+fmt(b+c)+" lembar",colSpan:2,styles:{fontStyle:"bold",fillColor:[236,239,242]}}]);
+        }
+        if(!body.length) body.push([{content:"Tidak ada pencatatan pada periode ini.",colSpan:10,styles:{halign:"center",textColor:[120,128,136]}}]);
+        doc.autoTable({...base,startY:y+3,
+          head:[["No","Waktu","Printer · Lantai","Pengguna","Counter HP","Counter W","Selisih HP","Selisih W","Oleh","Catatan"]],
+          body, columnStyles:{0:{halign:"right",cellWidth:9},1:{cellWidth:14},4:numR,5:numR,6:{halign:"right",fontStyle:"bold"},7:{halign:"right",fontStyle:"bold"},9:{cellWidth:60}}});
+        y=doc.lastAutoTable.finalY+8;
+      }
+      // tanda tangan
+      if(y>doc.internal.pageSize.getHeight()-40){ doc.addPage(); y=20; }
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...head);
+      const sx=[W-M-150,W-M-60];
+      doc.text("Dibuat oleh,",sx[0],y+4); doc.text("Diketahui oleh,",sx[1],y+4);
+      doc.setDrawColor(...head); doc.line(sx[0],y+26,sx[0]+55,y+26); doc.line(sx[1],y+26,sx[1]+55,y+26);
+      doc.text(me.nama||me.username,sx[0],y+31); doc.text("(.................................)",sx[1],y+31);
+      // nomor halaman
+      const n=doc.internal.getNumberOfPages(), H=doc.internal.pageSize.getHeight();
+      for(let i=1;i<=n;i++){ doc.setPage(i); doc.setFontSize(8); doc.setTextColor(120,128,136);
+        doc.text("Laporan Pemakaian Printer · "+dayLabel(D.from)+" – "+dayLabel(D.to),M,H-6);
+        doc.text("Halaman "+i+" dari "+n,W-M,H-6,{align:"right"}); }
+      const name=`Laporan-Pemakaian-Printer_${D.from}_sd_${D.to}.pdf`;
+      if(window.__pdfSave) await window.__pdfSave(doc,name); else doc.save(name);
+      st.className="status ok"; st.textContent="PDF diunduh: "+name;
+    }catch(e){ st.className="status err"; st.textContent=(e&&e.message)||"PDF gagal dibuat. Gunakan tombol Cetak lalu pilih Simpan sebagai PDF."; }
+    finally{ btn.disabled=false; }
+  }
+
+  /* ---------- daftar printer (admin) ---------- */
+  function emptyPrinters(){ return `<div class="empty"><h3>Belum ada printer</h3><p class="muted">${isAdmin()?"Tambahkan printer di tab Daftar printer.":"Minta admin menambahkan printer."}</p></div>`; }
+  function renderPrinters(main){
+    const ed=printers.find(p=>p.id===editingId)||null;
+    const f=ed||{merk:"Epson",tipe:"",user:"",divisi:"",lantai:"L2",koneksi:"",sn:"",printerName:"",status:"Aktif",mono:false};
+    main.innerHTML=`
+      <div class="section-head"><h2>Daftar printer</h2><span class="muted num">${printers.length} printer</span></div>
+      ${printers.length?`<div class="tablebox"><table style="min-width:900px"><thead><tr><th class="r" style="width:48px">No</th><th>Lantai</th><th>Printer</th><th>Serial number</th><th>Pengguna / divisi</th><th>Koneksi</th><th>Status</th><th></th></tr></thead><tbody>
+        ${orderedPrinters().map((p,i)=>`<tr><td class="r num muted">${i+1}</td><td>${esc(floorLabel(p.lantai))}</td><td><span class="pname">${esc(p.merk)} ${esc(p.tipe)}</span>${p.mono?'<span class="badge mono">Hitam saja</span>':""}<div class="pmeta">${esc(p.printerName)}</div></td>
+          <td><input type="text" class="sn-in" data-snid="${esc(p.id)}" value="${esc(p.sn)}" placeholder="isi serial number" aria-label="Serial number ${esc(p.tipe)} ${esc(p.user)}" style="width:100%;min-width:150px" autocapitalize="characters" spellcheck="false"></td>
+          <td>${esc(p.user)}<div class="pmeta">${esc(p.divisi)}</div></td><td class="pmeta">${esc(p.koneksi)}</td><td>${esc(p.status)}</td>
+          <td class="r" style="white-space:nowrap"><button class="btn ghost" data-edit="${esc(p.id)}">Ubah</button> <button class="btn danger" data-del="${esc(p.id)}">Hapus</button></td></tr>`).join("")}
+      </tbody></table></div>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:10px"><span class="status" id="snStatus"></span><button class="btn" id="snSave">Simpan serial number</button></div>`:emptyPrinters()}
+      <div class="card section" id="pform">
+        <h3 style="margin-bottom:14px">${ed?"Ubah printer":"Tambah printer"}</h3>
+        <div class="grid2">
+          <label class="f">Merk<input type="text" name="merk" value="${esc(f.merk)}"></label>
+          <label class="f">Tipe<input type="text" name="tipe" value="${esc(f.tipe)}" placeholder="mis. L3210"></label>
+          <label class="f">Pengguna<input type="text" name="user" value="${esc(f.user)}"></label>
+          <label class="f">Divisi<input type="text" name="divisi" value="${esc(f.divisi)}"></label>
+          <label class="f">Lantai<input type="text" name="lantai" value="${esc(f.lantai)}" placeholder="L2"></label>
+          <label class="f">Koneksi / IP<input type="text" name="koneksi" value="${esc(f.koneksi)}"></label>
+          <label class="f">Serial number<input type="text" name="sn" value="${esc(f.sn)}"></label>
+          <label class="f">Printer name<input type="text" name="printerName" value="${esc(f.printerName)}"></label>
+          <label class="f">Status<select name="status">${["Aktif","Backup","Rusak"].map(s=>`<option ${f.status===s?"selected":""}>${s}</option>`).join("")}</select></label>
+        </div>
+        <label class="check" style="margin-top:14px"><input type="checkbox" name="mono" ${f.mono?"checked":""}> Hanya cetak hitam-putih (mis. dot matrix LX300)</label>
+        <div style="display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="pSave">${ed?"Simpan perubahan":"Tambah printer"}</button>
+          ${ed?`<button class="btn ghost" id="pCancel">Batal</button>`:""}
+          <span class="status" id="pStatus"></span>
+        </div>
+      </div>
+      <div class="card section">
+        <h3>Biaya per lembar</h3>
+        <p class="muted" style="margin:4px 0 14px">Opsional. Isi untuk menampilkan estimasi biaya di ringkasan.</p>
+        <div class="grid2">
+          <label class="f">Hitam-putih (Rp)<input type="number" min="0" id="costBw" value="${esc(settings.costBw||"")}"></label>
+          <label class="f">Warna (Rp)<input type="number" min="0" id="costColor" value="${esc(settings.costColor||"")}"></label>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;align-items:center"><button class="btn" id="cSave">Simpan biaya</button><span class="status" id="cStatus"></span></div>
+      </div>`;
+    main.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{editingId=b.dataset.edit;render();$("#pform").scrollIntoView({behavior:"smooth"})});
+    main.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+      const p=printers.find(x=>x.id===b.dataset.del); if(!p||!confirm(`Hapus ${p.tipe} (${p.user}) dari daftar? Riwayat counternya tetap tersimpan di spreadsheet.`)) return;
+      try{ apply(await api("deletePrinter",{id:p.id})); }catch(e){ alert("Gagal menghapus: "+e.message); }
+    });
+    main.querySelectorAll(".sn-in").forEach(i=>i.addEventListener("input",()=>{const s=$("#snStatus");s.className="status";s.textContent="Belum disimpan";}));
+    const snb=$("#snSave"); if(snb) snb.onclick=async()=>{
+      const st=$("#snStatus"); const items=[];
+      main.querySelectorAll(".sn-in").forEach(i=>{const p=pById(i.dataset.snid); if(p&&(p.sn||"")!==i.value.trim()) items.push({id:p.id,sn:i.value.trim()});});
+      if(!items.length){ st.className="status"; st.textContent="Tidak ada perubahan"; return; }
+      snb.disabled=true; st.className="status"; st.textContent="Menyimpan…";
+      try{ apply(await api("savePrinterSN",{items}),true); render(); const s2=$("#snStatus"); s2.className="status ok"; s2.textContent=`Serial number tersimpan (${items.length} printer)`; }
+      catch(e){ snb.disabled=false; st.className="status err"; st.textContent="Gagal menyimpan: "+e.message; }
+    };
+    const c=$("#pCancel"); if(c) c.onclick=()=>{editingId=null;render()};
+    $("#pSave").onclick=async()=>{
+      const box=$("#pform"), g=k=>box.querySelector(`[name=${k}]`), st=$("#pStatus");
+      const data={merk:g("merk").value.trim(),tipe:g("tipe").value.trim(),user:g("user").value.trim(),divisi:g("divisi").value.trim(),lantai:g("lantai").value.trim().toUpperCase()||"L?",koneksi:g("koneksi").value.trim(),sn:g("sn").value.trim(),printerName:g("printerName").value.trim(),status:g("status").value,mono:g("mono").checked};
+      if(!data.tipe){ st.className="status err"; st.textContent="Isi tipe printer dulu."; return; }
+      $("#pSave").disabled=true; st.className="status"; st.textContent="Menyimpan…";
+      try{ const d=await api("savePrinter",{printer:ed?{...ed,...data}:data}); editingId=null; apply(d,true); render(); }
+      catch(e){ $("#pSave").disabled=false; st.className="status err"; st.textContent="Gagal menyimpan: "+e.message; }
+    };
+    $("#cSave").onclick=async()=>{
+      const st=$("#cStatus");
+      try{ apply(await api("saveSettings",{settings:{costBw:Number($("#costBw").value)||0,costColor:Number($("#costColor").value)||0}}),true); st.className="status ok"; st.textContent="Biaya tersimpan"; }
+      catch(e){ st.className="status err"; st.textContent="Gagal menyimpan: "+e.message; }
+    };
+  }
+
+  /* ---------- pengguna (admin) ---------- */
+  function renderUsers(main){
+    const ed=users.find(u=>u.username===editingUser)||null;
+    const f=ed||{username:"",nama:"",role:"staff",aktif:true};
+    main.innerHTML=`
+      <div class="section-head"><h2>Pengguna</h2><span class="muted num">${users.length} akun</span></div>
+      <div class="tablebox"><table style="min-width:560px"><thead><tr><th>Username</th><th>Nama</th><th>Peran</th><th>Status</th><th></th></tr></thead><tbody>
+        ${users.map(u=>`<tr><td class="pname">${esc(u.username)}${u.username===me.username?' <span class="badge">Anda</span>':""}</td><td>${esc(u.nama)}</td>
+          <td><span class="badge ${u.role==="admin"?"admin":""}" style="margin:0">${u.role==="admin"?"Admin":"Staff"}</span></td>
+          <td>${u.aktif?"Aktif":'<span class="muted">Nonaktif</span>'}</td>
+          <td class="r" style="white-space:nowrap"><button class="btn ghost" data-uedit="${esc(u.username)}">Ubah</button>${u.username!==me.username?` <button class="btn danger" data-udel="${esc(u.username)}">Hapus</button>`:""}</td></tr>`).join("")}
+      </tbody></table></div>
+      <div class="card section" id="uform">
+        <h3 style="margin-bottom:6px">${ed?"Ubah pengguna "+esc(ed.username):"Tambah pengguna"}</h3>
+        <p class="muted" style="margin:0 0 14px;font-size:.92rem"><b>Staff</b> bisa melihat ringkasan dan riwayat, serta mengisi counter sekarang. <b>Admin</b> juga bisa mengelola printer, biaya, pengguna, dan menghapus riwayat.</p>
+        <div class="grid2">
+          <label class="f">Username<input type="text" name="username" value="${esc(f.username)}" ${ed?"disabled":""} autocapitalize="none" spellcheck="false" placeholder="mis. budi.it"></label>
+          <label class="f">Nama lengkap<input type="text" name="nama" value="${esc(f.nama)}"></label>
+          <label class="f">Peran<select name="role"><option value="staff" ${f.role==="staff"?"selected":""}>Staff</option><option value="admin" ${f.role==="admin"?"selected":""}>Admin</option></select></label>
+          <label class="f">${ed?"Password baru (kosongkan jika tidak diganti)":"Password (min. 6 karakter)"}<input type="text" name="password" autocomplete="new-password" autocapitalize="none" spellcheck="false"></label>
+        </div>
+        <label class="check" style="margin-top:14px"><input type="checkbox" name="aktif" ${f.aktif?"checked":""}> Akun aktif (bisa login)</label>
+        <div style="display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="uSave">${ed?"Simpan perubahan":"Tambah pengguna"}</button>
+          ${ed?`<button class="btn ghost" id="uCancel">Batal</button>`:""}
+          <span class="status" id="uStatus"></span>
+        </div>
+      </div>`;
+    main.querySelectorAll("[data-uedit]").forEach(b=>b.onclick=()=>{editingUser=b.dataset.uedit;render();$("#uform").scrollIntoView({behavior:"smooth"})});
+    main.querySelectorAll("[data-udel]").forEach(b=>b.onclick=async()=>{
+      if(!confirm(`Hapus akun ${b.dataset.udel}? Orang ini tidak bisa login lagi.`)) return;
+      try{ apply(await api("deleteUser",{username:b.dataset.udel})); }catch(e){ alert("Gagal menghapus: "+e.message); }
+    });
+    const c=$("#uCancel"); if(c) c.onclick=()=>{editingUser=null;render()};
+    $("#uSave").onclick=async()=>{
+      const box=$("#uform"), g=k=>box.querySelector(`[name=${k}]`), st=$("#uStatus");
+      const user={username:ed?ed.username:g("username").value.trim().toLowerCase(),nama:g("nama").value.trim(),role:g("role").value,aktif:g("aktif").checked,password:g("password").value,isNew:!ed};
+      if(!user.username){ st.className="status err"; st.textContent="Isi username dulu."; return; }
+      if(!ed&&user.password.length<6){ st.className="status err"; st.textContent="Password minimal 6 karakter."; return; }
+      $("#uSave").disabled=true; st.className="status"; st.textContent="Menyimpan…";
+      try{ const d=await api("saveUser",{user}); editingUser=null; apply(d,true); render(); }
+      catch(e){ $("#uSave").disabled=false; st.className="status err"; st.textContent=e.message; }
+    };
+  }
+
+  /* ---------- akun ---------- */
+  function renderAccount(main){
+    main.innerHTML=`<div class="card" style="max-width:520px">
+      <h2>Akun saya</h2>
+      <p class="muted" style="margin:6px 0 18px">${esc(me.nama||me.username)} · username <b>${esc(me.username)}</b> · ${me.role==="admin"?"Admin":"Staff"}</p>
+      <h3 style="margin-bottom:12px">Ganti password</h3>
+      <label class="f">Password lama<input type="password" id="pwOld" autocomplete="current-password"></label>
+      <label class="f" style="margin-top:12px">Password baru (min. 6 karakter)<input type="password" id="pwNew" autocomplete="new-password"></label>
+      <label class="f" style="margin-top:12px">Ulangi password baru<input type="password" id="pwNew2" autocomplete="new-password"></label>
+      <div style="display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap"><button class="btn" id="pwSave">Simpan password</button><span class="status" id="pwStatus"></span></div>
+    </div>`;
+    $("#pwSave").onclick=async()=>{
+      const st=$("#pwStatus"), a=$("#pwOld").value, b=$("#pwNew").value, c=$("#pwNew2").value;
+      if(b.length<6){ st.className="status err"; st.textContent="Password baru minimal 6 karakter."; return; }
+      if(b!==c){ st.className="status err"; st.textContent="Ulangan password tidak sama."; return; }
+      $("#pwSave").disabled=true; st.className="status"; st.textContent="Menyimpan…";
+      try{ await api("changePassword",{oldPassword:a,newPassword:b}); st.className="status ok"; st.textContent="Password berhasil diganti."; $("#pwOld").value=$("#pwNew").value=$("#pwNew2").value=""; }
+      catch(e){ st.className="status err"; st.textContent=e.message; }
+      finally{ $("#pwSave").disabled=false; }
+    };
+  }
+
+  /* ---------- load ---------- */
+  function apply(d,quiet){
+    me=d.me||me; printers=d.printers||[]; readings=Array.isArray(d.readings)?d.readings:[]; settings=d.settings||{costBw:0,costColor:0};
+    users=d.users||[]; sheetUrl=d.sheetUrl||""; loadedAt=d.loadedAt||"";
+    if(d.today&&d.today!==today){ const was=today; today=d.today; if(selDay===was) selDay=today; if(readDate===was) readDate=today; if(selMonth===was.slice(0,7)) selMonth=today.slice(0,7); if(histMonth===was.slice(0,7)) histMonth=today.slice(0,7); if(String(selYear)===was.slice(0,4)) selYear=Number(today.slice(0,4)); }
+    loaded=true; loadError="";
+    if(!d.__cached){ try{ localStorage.setItem("pp_cache",JSON.stringify(d)); }catch(e){} }
+    syncPeriodInputs();
+    if(quiet) return;
+    buildTabs();
+    if(tab==="update"&&dirty){ const s=$("#saveStatus"); if(s&&!s.textContent) s.textContent="Belum disimpan"; return; }
+    const ae=document.activeElement;
+    if(ae&&ae.closest&&(ae.closest(".card")||ae.closest(".toolbar"))&&tab!=="ringkasan") return;
+    render();
+  }
+  let loading=false;
+  async function load(){
+    if(!token||loading) return;
+    loading=true; const si=$("#syncInfo"); if(si) si.textContent="Memperbarui data…";
+    try{ apply(await api("getAll")); if(si) si.textContent=""; }
+    catch(e){ if(token){ loadError=e.message; if(!loaded) render(); else if(si) si.textContent="Gagal memperbarui, menampilkan data terakhir"; } }
+    finally{ loading=false; }
+  }
+
+  if(token){ me={username:"",nama:"",role:"staff"}; try{ const c=JSON.parse(localStorage.getItem("pp_cache")||"null"); if(c&&c.me){ c.__cached=true; apply(c,true); } }catch(e){} buildTabs(); }
+  syncPeriodInputs(); render(); load();
+  setInterval(()=>{ if(token&&!document.hidden) load(); },60000);
+  document.addEventListener("visibilitychange",()=>{ if(token&&!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
